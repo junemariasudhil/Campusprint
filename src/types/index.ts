@@ -38,6 +38,7 @@ export interface Profile {
   full_name: string | null
   email: string | null
   role: Role
+  print_shop_id: string | null
   created_at: string
 }
 
@@ -89,6 +90,7 @@ export interface PrintRequest {
   created_at: string
   updated_at: string
   print_shops?: Pick<PrintShop, 'id' | 'name' | 'location'>
+  profiles?: Pick<Profile, 'full_name' | 'email'>
 }
 
 export interface PriceBreakdown {

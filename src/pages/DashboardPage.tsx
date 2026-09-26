@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { cancelRequest, fetchMyRequests } from '@/services/requestService'
 import { formatCurrency, isCampusEmail } from '@/lib/utils'
+import { supabase } from '@/lib/supabase'
 import type { PrintRequest } from '@/types'
 
 const FILTERS = ['All', 'Active', 'Ready', 'Completed'] as const
@@ -41,6 +42,22 @@ export default function DashboardPage() {
   useEffect(() => {
     load()
   }, [load])
+
+  useEffect(() => {
+    if (!profile) return
+    const channel = supabase
+      .channel(`dashboard-requests-${profile.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'print_requests', filter: `user_id=eq.${profile.id}` },
+        () => load(),
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [profile, load])
 
   async function handleCancel(request: PrintRequest) {
     if (!confirm(`Cancel request ${request.request_id}?`)) return
@@ -90,7 +107,7 @@ export default function DashboardPage() {
         </Button>
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard icon={Package} label="Active Requests" value={stats.active} />
         <StatCard icon={Clock} label="Ready for Pickup" value={stats.ready} />
         <StatCard icon={Package} label="Completed" value={stats.completed} />
@@ -114,7 +131,7 @@ export default function DashboardPage() {
           No print requests yet.
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           {filtered.map((r) => (
             <RequestCard key={r.id} request={r} onCancel={handleCancel} />
           ))}

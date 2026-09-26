@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LogOut, Printer, ShieldCheck } from 'lucide-react'
+import { LogOut, Printer, ShieldCheck, Store } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { signOut } from '@/services/authService'
 import { cn } from '@/lib/utils'
+import { roleHomePath } from '@/lib/roleRouting'
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { profile } = useAuth()
@@ -18,10 +19,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const initial = (profile?.full_name || profile?.email || '?').charAt(0).toUpperCase()
 
   return (
-    <div className="min-h-screen bg-cream">
-      <header className="sticky top-0 z-20 border-b border-orange-100/60 bg-cream/90 backdrop-blur">
-        <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-4">
-          <Link to="/dashboard" className="flex items-center gap-2">
+    <div className="min-h-screen w-full bg-cream">
+      <header className="sticky top-0 z-20 w-full border-b border-orange-100/60 bg-cream/90 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-4 py-4 sm:px-6 lg:px-10">
+          <Link to={roleHomePath(profile?.role)} className="flex items-center gap-2">
             <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-r from-orange-500 to-amber-400 text-white shadow-md shadow-orange-500/20">
               <Printer className="h-5 w-5" />
             </span>
@@ -43,6 +44,20 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <span className="hidden sm:inline">Admin</span>
               </Link>
             )}
+            {profile?.role === 'print_shop' && (
+              <Link
+                to="/print-shop"
+                className={cn(
+                  'flex items-center gap-1 rounded-2xl px-3 py-2 text-sm font-semibold transition-colors',
+                  location.pathname === '/print-shop'
+                    ? 'bg-orange-100 text-orange-700'
+                    : 'text-slate-500 hover:bg-orange-50',
+                )}
+              >
+                <Store className="h-4 w-4" />
+                <span className="hidden sm:inline">Queue</span>
+              </Link>
+            )}
             <span className="ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-orange-100 text-sm font-bold text-orange-700">
               {initial}
             </span>
@@ -57,7 +72,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-4 pb-16 pt-6">{children}</main>
+      <main className="mx-auto w-full max-w-screen-2xl px-4 pb-16 pt-6 sm:px-6 lg:px-10">{children}</main>
     </div>
   )
 }

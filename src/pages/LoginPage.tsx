@@ -17,7 +17,7 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
 
-  if (!loading && session) return <Navigate to="/dashboard" replace />
+  if (!loading && session) return <Navigate to="/" replace />
 
   async function handleGoogle() {
     setError(null)

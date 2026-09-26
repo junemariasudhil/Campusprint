@@ -70,82 +70,84 @@ export default function AdminPage() {
         <p className="text-sm text-slate-400">Manage campus print rates and shop availability.</p>
       </div>
 
-      <Card className="mb-6 p-5">
-        <div className="mb-4 flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-orange-50 text-orange-500">
-            <Settings2 className="h-4 w-4" />
-          </span>
-          <h2 className="font-bold text-slate-800">Print rates</h2>
-        </div>
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 xl:items-start">
+        <Card className="p-5">
+          <div className="mb-4 flex items-center gap-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-orange-50 text-orange-500">
+              <Settings2 className="h-4 w-4" />
+            </span>
+            <h2 className="font-bold text-slate-800">Print rates</h2>
+          </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {RATE_FIELDS.map((field) => (
-            <label key={field.key} className="text-xs font-semibold text-slate-500">
-              {field.label}
-              <input
-                type="number"
-                step="0.01"
-                value={rates[field.key] as number}
-                onChange={(e) => setRates({ ...rates, [field.key]: Number(e.target.value) })}
-                className="mt-1 w-full rounded-xl border border-orange-100 bg-white px-3 py-2 text-sm font-medium text-slate-800 outline-none focus:border-orange-300"
-              />
-            </label>
-          ))}
-        </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-3">
+            {RATE_FIELDS.map((field) => (
+              <label key={field.key} className="text-xs font-semibold text-slate-500">
+                {field.label}
+                <input
+                  type="number"
+                  step="0.01"
+                  value={rates[field.key] as number}
+                  onChange={(e) => setRates({ ...rates, [field.key]: Number(e.target.value) })}
+                  className="mt-1 w-full rounded-xl border border-orange-100 bg-white px-3 py-2 text-sm font-medium text-slate-800 outline-none focus:border-orange-300"
+                />
+              </label>
+            ))}
+          </div>
 
-        <div className="mt-4 flex items-center gap-3">
-          <Button onClick={handleSaveRates} disabled={saving} icon={<Save className="h-4 w-4" />}>
-            {saving ? 'Saving…' : 'Save rates'}
-          </Button>
-          {savedAt && <span className="text-xs text-green-600">Saved</span>}
-        </div>
-      </Card>
+          <div className="mt-4 flex items-center gap-3">
+            <Button onClick={handleSaveRates} disabled={saving} icon={<Save className="h-4 w-4" />}>
+              {saving ? 'Saving…' : 'Save rates'}
+            </Button>
+            {savedAt && <span className="text-xs text-green-600">Saved</span>}
+          </div>
+        </Card>
 
-      <Card className="p-5">
-        <div className="mb-4 flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-            <Store className="h-4 w-4" />
-          </span>
-          <h2 className="font-bold text-slate-800">Print shops</h2>
-        </div>
+        <Card className="p-5">
+          <div className="mb-4 flex items-center gap-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+              <Store className="h-4 w-4" />
+            </span>
+            <h2 className="font-bold text-slate-800">Print shops</h2>
+          </div>
 
-        <div className="flex flex-col gap-3">
-          {shops.map((shop) => (
-            <div key={shop.id} className="rounded-2xl border border-orange-100/60 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="font-semibold text-slate-800">{shop.name}</p>
-                  <p className="text-xs text-slate-400">{shop.location}</p>
+          <div className="flex flex-col gap-3">
+            {shops.map((shop) => (
+              <div key={shop.id} className="rounded-2xl border border-orange-100/60 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-slate-800">{shop.name}</p>
+                    <p className="text-xs text-slate-400">{shop.location}</p>
+                  </div>
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+                    Active
+                    <input
+                      type="checkbox"
+                      checked={shop.active}
+                      onChange={(e) => handleShopChange(shop, { active: e.target.checked })}
+                      className="h-4 w-4 accent-orange-500"
+                    />
+                  </label>
                 </div>
-                <label className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-                  Active
-                  <input
-                    type="checkbox"
-                    checked={shop.active}
-                    onChange={(e) => handleShopChange(shop, { active: e.target.checked })}
-                    className="h-4 w-4 accent-orange-500"
-                  />
-                </label>
+                <div className="mt-3 flex gap-2">
+                  {APPROVAL_OPTIONS.map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => handleShopChange(shop, { approval_status: status })}
+                      className={`rounded-full px-3 py-1 text-[11px] font-bold transition-colors ${
+                        shop.approval_status === status
+                          ? 'bg-gradient-to-r from-orange-500 to-amber-400 text-white'
+                          : 'bg-slate-100 text-slate-500'
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="mt-3 flex gap-2">
-                {APPROVAL_OPTIONS.map((status) => (
-                  <button
-                    key={status}
-                    onClick={() => handleShopChange(shop, { approval_status: status })}
-                    className={`rounded-full px-3 py-1 text-[11px] font-bold transition-colors ${
-                      shop.approval_status === status
-                        ? 'bg-gradient-to-r from-orange-500 to-amber-400 text-white'
-                        : 'bg-slate-100 text-slate-500'
-                    }`}
-                  >
-                    {status}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
+            ))}
+          </div>
+        </Card>
+      </div>
     </AppShell>
   )
 }

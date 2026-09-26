@@ -77,6 +77,7 @@ export default function NewRequestPage() {
 
   return (
     <AppShell>
+      <div className="mx-auto max-w-2xl">
       <button
         onClick={goBack}
         className="mb-4 flex items-center gap-1 text-sm font-semibold text-slate-500 hover:text-slate-700"
@@ -114,6 +115,7 @@ export default function NewRequestPage() {
           )}
         </>
       )}
+      </div>
     </AppShell>
   )
 }

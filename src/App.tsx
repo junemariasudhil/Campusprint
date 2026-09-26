@@ -2,9 +2,11 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { FullPageSpinner } from '@/components/ui/Spinner'
+import { roleHomePath } from '@/lib/roleRouting'
 import LoginPage from '@/pages/LoginPage'
 import DashboardPage from '@/pages/DashboardPage'
 import AdminPage from '@/pages/AdminPage'
+import PrintShopPage from '@/pages/PrintShopPage'
 import NewRequestPage from '@/pages/request-flow/NewRequestPage'
 
 function RoleHome() {
@@ -12,8 +14,7 @@ function RoleHome() {
 
   if (loading) return <FullPageSpinner />
   if (!session) return <Navigate to="/login" replace />
-  if (profile?.role === 'admin') return <Navigate to="/admin" replace />
-  return <Navigate to="/dashboard" replace />
+  return <Navigate to={roleHomePath(profile?.role)} replace />
 }
 
 export default function App() {
@@ -25,7 +26,7 @@ export default function App() {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute roles={['student', 'teacher']}>
               <DashboardPage />
             </ProtectedRoute>
           }
@@ -43,6 +44,14 @@ export default function App() {
           element={
             <ProtectedRoute roles={['admin']}>
               <AdminPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/print-shop"
+          element={
+            <ProtectedRoute roles={['print_shop']}>
+              <PrintShopPage />
             </ProtectedRoute>
           }
         />

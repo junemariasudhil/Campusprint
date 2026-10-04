@@ -17,6 +17,7 @@ export default function PrintShopPage() {
   const [queue, setQueue] = useState<PrintRequest[]>([])
   const [history, setHistory] = useState<PrintRequest[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('Live Queue')
 
   const shopId = profile?.print_shop_id ?? null
@@ -24,10 +25,19 @@ export default function PrintShopPage() {
   const load = useCallback(async () => {
     if (!shopId) return
     setLoading(true)
-    const [queueData, historyData] = await Promise.all([fetchShopQueue(shopId), fetchShopHistory(shopId)])
-    setQueue(queueData)
-    setHistory(historyData)
-    setLoading(false)
+    setLoadError(null)
+    // Same fix as DashboardPage: an unhandled rejection here used to leave the
+    // queue stuck on the spinner forever with no error shown.
+    try {
+      const [queueData, historyData] = await Promise.all([fetchShopQueue(shopId), fetchShopHistory(shopId)])
+      setQueue(queueData)
+      setHistory(historyData)
+    } catch (err) {
+      console.error('Failed to load print shop queue:', err)
+      setLoadError(err instanceof Error ? err.message : 'Failed to load the queue.')
+    } finally {
+      setLoading(false)
+    }
   }, [shopId])
 
   useEffect(() => {
@@ -91,7 +101,7 @@ export default function PrintShopPage() {
         </div>
       </div>
 
-      <div className="mb-6 grid grid-cols-3 gap-4">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3 2xl:gap-6">
         <StatCard icon={ListOrdered} label="Queued" value={stats.queued} />
         <StatCard icon={Printer} label="Printing" value={stats.printing} />
         <StatCard icon={Clock} label="Ready for pickup" value={stats.ready} />
@@ -109,12 +119,22 @@ export default function PrintShopPage() {
         <div className="flex justify-center py-12">
           <Spinner className="h-6 w-6" />
         </div>
+      ) : loadError ? (
+        <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-red-200 bg-red-50/40 py-12 text-center text-sm text-red-600">
+          <p>{loadError}</p>
+          <button
+            onClick={load}
+            className="rounded-2xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+          >
+            Retry
+          </button>
+        </div>
       ) : list.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-orange-200 bg-orange-50/30 py-12 text-center text-sm text-slate-400">
           {tab === 'Live Queue' ? 'No active requests right now.' : 'No completed requests yet.'}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
           {list.map((r) => (
             <ShopRequestCard key={r.id} request={r} onAdvance={handleAdvance} />
           ))}

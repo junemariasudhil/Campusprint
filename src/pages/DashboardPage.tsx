@@ -29,14 +29,25 @@ export default function DashboardPage() {
   const navigate = useNavigate()
   const [requests, setRequests] = useState<PrintRequest[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [filter, setFilter] = useState<Filter>('All')
 
   const load = useCallback(async () => {
     if (!profile) return
     setLoading(true)
-    const data = await fetchMyRequests(profile.id)
-    setRequests(data)
-    setLoading(false)
+    setLoadError(null)
+    // Previously this had no try/catch: a thrown Supabase error (RLS denial,
+    // dropped network) became an unhandled promise rejection that left the
+    // page stuck on the spinner forever with nothing visible in the UI.
+    try {
+      const data = await fetchMyRequests(profile.id)
+      setRequests(data)
+    } catch (err) {
+      console.error('Failed to load print requests:', err)
+      setLoadError(err instanceof Error ? err.message : 'Failed to load your print requests.')
+    } finally {
+      setLoading(false)
+    }
   }, [profile])
 
   useEffect(() => {
@@ -107,7 +118,7 @@ export default function DashboardPage() {
         </Button>
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4 2xl:gap-6">
         <StatCard icon={Package} label="Active Requests" value={stats.active} />
         <StatCard icon={Clock} label="Ready for Pickup" value={stats.ready} />
         <StatCard icon={Package} label="Completed" value={stats.completed} />
@@ -126,12 +137,19 @@ export default function DashboardPage() {
         <div className="flex justify-center py-12">
           <Spinner className="h-6 w-6" />
         </div>
+      ) : loadError ? (
+        <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-red-200 bg-red-50/40 py-12 text-center text-sm text-red-600">
+          <p>{loadError}</p>
+          <Button variant="secondary" onClick={load}>
+            Retry
+          </Button>
+        </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-orange-200 bg-orange-50/30 py-12 text-center text-sm text-slate-400">
           No print requests yet.
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
           {filtered.map((r) => (
             <RequestCard key={r.id} request={r} onCancel={handleCancel} />
           ))}

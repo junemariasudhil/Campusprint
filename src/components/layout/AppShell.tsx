@@ -21,7 +21,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen w-full bg-cream">
       <header className="sticky top-0 z-20 w-full border-b border-orange-100/60 bg-cream/90 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-4 py-4 sm:px-6 lg:px-10">
+        <div className="flex w-full items-center justify-between px-4 py-4 sm:px-6 lg:px-10 2xl:px-16">
           <Link to={roleHomePath(profile?.role)} className="flex items-center gap-2">
             <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-r from-orange-500 to-amber-400 text-white shadow-md shadow-orange-500/20">
               <Printer className="h-5 w-5" />
@@ -72,7 +72,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-screen-2xl px-4 pb-16 pt-6 sm:px-6 lg:px-10">{children}</main>
+      <main className="w-full px-4 pb-16 pt-6 sm:px-6 lg:px-10 2xl:px-16">{children}</main>
     </div>
   )
 }
